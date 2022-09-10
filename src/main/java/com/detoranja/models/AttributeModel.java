@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -19,4 +20,6 @@ public class AttributeModel implements Serializable {
     private UUID id;
     @Column(nullable = false, unique = true)
     private String name;
+    @OneToMany(mappedBy = "attributeModel")
+    private List<AttributeValueModel> attributeValueModels;
 }

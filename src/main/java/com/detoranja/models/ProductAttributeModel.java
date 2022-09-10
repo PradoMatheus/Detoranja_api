@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -21,6 +22,8 @@ public class ProductAttributeModel implements Serializable {
     @JoinColumn(name = "attribute_model_id", nullable = false)
     private AttributeModel attributeModel;
     @ManyToOne
-    @JoinColumn(name = "attribute_value_id", nullable = false)
-    private AttributeValueModel attributeValueModel;
+    @JoinColumn(name = "product_id", nullable = false)
+    private ProductModel productModel;
+    @OneToMany(mappedBy = "productAttributeModel")
+    private List<ProductAttributeValueModel> productAttributeValueModels;
 }
