@@ -1,17 +1,18 @@
 package com.detoranja.controllers;
 
-import com.detoranja.dtos.InventoryDto;
 import com.detoranja.dtos.InventoryMovementDto;
-import com.detoranja.models.InventoryModel;
 import com.detoranja.models.InventoryMovementModel;
 import com.detoranja.services.InventoryMovementService;
 import com.detoranja.services.InventoryService;
+import com.detoranja.services.ProductService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,15 +22,22 @@ import java.util.UUID;
 public class InventoryMovementController {
 
     final InventoryMovementService inventoryMovementService;
+    final InventoryService inventoryService;
+    final ProductService productService;
 
-    public InventoryMovementController(InventoryMovementService inventoryMovementService) {
+    public InventoryMovementController(InventoryMovementService inventoryMovementService, InventoryService inventoryService, ProductService productService) {
         this.inventoryMovementService = inventoryMovementService;
+        this.inventoryService = inventoryService;
+        this.productService = productService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveInventoryMovement(@RequestBody @Valid InventoryMovementDto inventoryMovementDto) {
+        if (inventoryService.findById(inventoryMovementDto.getInventoryModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Inventory not found");
         var inventoryMovementModel = new InventoryMovementModel();
         BeanUtils.copyProperties(inventoryMovementDto, inventoryMovementModel);
+        inventoryMovementModel.setDate_movement(LocalDateTime.now(ZoneId.of("UTC")));
         return ResponseEntity.status(HttpStatus.CREATED).body(inventoryMovementService.save(inventoryMovementModel));
     }
 
@@ -57,10 +65,12 @@ public class InventoryMovementController {
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<Object> updateInventoryMovement(@RequestBody @Valid InventoryMovementDto inventoryMovementDto,
-                                                @PathVariable(value = "id") UUID id) {
+                                                          @PathVariable(value = "id") UUID id) {
         var inventoryMovementModelOptional = inventoryMovementService.findById(id);
         if (!inventoryMovementModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Inventory Movement not found.");
+        else if (inventoryService.findById(inventoryMovementDto.getInventoryModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Inventory not found");
         var inventoryMovementModel = inventoryMovementModelOptional.get();
         BeanUtils.copyProperties(inventoryMovementDto, inventoryMovementModel);
         return ResponseEntity.status(HttpStatus.OK).body(inventoryMovementService.save(inventoryMovementModel));

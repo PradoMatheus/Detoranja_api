@@ -1,5 +1,7 @@
 package com.detoranja.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +21,7 @@ public class AttributeValueModel implements Serializable {
     private UUID id;
     @Column(nullable = false, unique = true)
     private String name;
+    @JsonIgnoreProperties("attributeValueModels")
     @ManyToOne
     @JoinColumn(name = "product_attribute_id")
     private AttributeModel attributeModel;

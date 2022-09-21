@@ -1,6 +1,7 @@
 package com.detoranja.dtos;
 
 import com.detoranja.models.AttributeModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 

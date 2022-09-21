@@ -1,5 +1,6 @@
 package com.detoranja.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,10 +31,15 @@ public class ClientModel implements Serializable {
     private LocalDate birth_data;
     @Column(nullable = false)
     private LocalDateTime create_date;
+    @JsonIgnoreProperties("clientModel")
     @OneToMany(mappedBy = "clientModel")
     private List<ClientContactModel> clientContactModels;
+    @JsonIgnoreProperties("clientModel")
     @OneToMany(mappedBy = "clientModel")
     private List<ClientAddressModel> clientAddressModels;
+    @JsonIgnoreProperties("clientModel")
+    @OneToMany(mappedBy = "clientModel")
+    private List<ClientPaymentModel> clientPaymentModels;
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private CompanyModel companyModel;

@@ -1,10 +1,9 @@
 package com.detoranja.controllers;
 
-import com.detoranja.dtos.OrderCouponDto;
 import com.detoranja.dtos.OrderPaymentDto;
-import com.detoranja.models.OrderCouponModel;
 import com.detoranja.models.OrderPaymentModel;
 import com.detoranja.services.OrderPaymentService;
+import com.detoranja.services.OrderService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +19,17 @@ import java.util.UUID;
 public class OrderPaymentController {
 
     final OrderPaymentService orderPaymentService;
+    final OrderService orderService;
 
-    public OrderPaymentController(OrderPaymentService orderPaymentService) {
+    public OrderPaymentController(OrderPaymentService orderPaymentService, OrderService orderService) {
         this.orderPaymentService = orderPaymentService;
+        this.orderService = orderService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveOrderPayment(@RequestBody @Valid OrderPaymentDto orderPaymentDto) {
+        if (orderService.findById(orderPaymentDto.getOrderModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Order not found");
         var orderPaymentModel = new OrderPaymentModel();
         BeanUtils.copyProperties(orderPaymentDto, orderPaymentModel);
         return ResponseEntity.status(HttpStatus.OK).body(orderPaymentService.save(orderPaymentModel));
@@ -59,6 +62,8 @@ public class OrderPaymentController {
         var orderPaymentModelOptional = orderPaymentService.findById(id);
         if (!orderPaymentModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order Payment not found");
+        else if (orderService.findById(orderPaymentDto.getOrderModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Order not found");
         var orderPaymentModel = orderPaymentModelOptional.get();
         BeanUtils.copyProperties(orderPaymentDto, orderPaymentModel);
         return ResponseEntity.status(HttpStatus.OK).body(orderPaymentService.save(orderPaymentModel));

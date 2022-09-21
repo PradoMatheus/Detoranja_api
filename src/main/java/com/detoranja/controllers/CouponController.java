@@ -1,9 +1,8 @@
 package com.detoranja.controllers;
 
-import com.detoranja.dtos.ClientDto;
 import com.detoranja.dtos.CouponDto;
-import com.detoranja.models.ClientModel;
 import com.detoranja.models.CouponModel;
+import com.detoranja.services.CompanyService;
 import com.detoranja.services.CouponService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
@@ -22,15 +21,19 @@ import java.util.UUID;
 public class CouponController {
 
     final CouponService couponService;
+    final CompanyService companyService;
 
-    public CouponController(CouponService couponService) {
+    public CouponController(CouponService couponService, CompanyService companyService) {
         this.couponService = couponService;
+        this.companyService = companyService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveCoupon(@RequestBody @Valid CouponDto couponDto) {
         if (couponService.existByName(couponDto.getName()))
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: Name is already in use.");
+        else if (companyService.findById(couponDto.getCompanyModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Company not found");
         var couponModel = new CouponModel();
         BeanUtils.copyProperties(couponDto, couponModel);
         couponModel.setCreate_date(LocalDateTime.now(ZoneId.of("UTC")));
@@ -64,6 +67,8 @@ public class CouponController {
         var couponModelOptional = couponService.findById(id);
         if (!couponModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Coupon not found");
+        else if (companyService.findById(couponDto.getCompanyModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Company not found");
         var couponModel = couponModelOptional.get();
         BeanUtils.copyProperties(couponDto, couponModel);
         return ResponseEntity.status(HttpStatus.OK).body(couponService.save(couponModel));

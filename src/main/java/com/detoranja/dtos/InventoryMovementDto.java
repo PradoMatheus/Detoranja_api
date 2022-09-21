@@ -1,6 +1,8 @@
 package com.detoranja.dtos;
 
 import com.detoranja.enums.TypeMovement;
+import com.detoranja.models.InventoryModel;
+import com.detoranja.models.ProductModel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,9 +16,9 @@ import java.util.UUID;
 @Setter
 public class InventoryMovementDto implements Serializable {
     @NotBlank
+    private InventoryModel inventoryModel;
+    @NotBlank
     private int quantity;
     @NotBlank
     private TypeMovement type;
-    @NotBlank
-    private LocalDateTime date_movement;
 }

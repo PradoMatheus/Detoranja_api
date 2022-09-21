@@ -1,9 +1,8 @@
 package com.detoranja.controllers;
 
-import com.detoranja.dtos.OrderCouponDto;
 import com.detoranja.dtos.OrderShippingDto;
-import com.detoranja.models.OrderCouponModel;
 import com.detoranja.models.OrderShippingModel;
+import com.detoranja.services.OrderService;
 import com.detoranja.services.OrderShippingService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
@@ -20,13 +19,17 @@ import java.util.UUID;
 public class OrderShippingController {
 
     final OrderShippingService orderShippingService;
+    final OrderService orderService;
 
-    public OrderShippingController(OrderShippingService orderShippingService) {
+    public OrderShippingController(OrderShippingService orderShippingService, OrderService orderService) {
         this.orderShippingService = orderShippingService;
+        this.orderService = orderService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveOrderShipping(@RequestBody @Valid OrderShippingDto orderShippingDto) {
+        if (orderService.findById(orderShippingDto.getOrderModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Order not found");
         var orderShippingModel = new OrderShippingModel();
         BeanUtils.copyProperties(orderShippingDto, orderShippingModel);
         return ResponseEntity.status(HttpStatus.OK).body(orderShippingService.save(orderShippingModel));
@@ -59,6 +62,8 @@ public class OrderShippingController {
         var orderShippingModelOptional = orderShippingService.findById(id);
         if (!orderShippingModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order Shipping not found");
+        else if (orderService.findById(orderShippingDto.getOrderModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Order not found");
         var orderShippingModel = orderShippingModelOptional.get();
         BeanUtils.copyProperties(orderShippingDto, orderShippingModel);
         return ResponseEntity.status(HttpStatus.OK).body(orderShippingService.save(orderShippingModel));

@@ -3,12 +3,17 @@ package com.detoranja.controllers;
 import com.detoranja.dtos.SupplierDto;
 import com.detoranja.models.SupplierModel;
 import com.detoranja.services.SupplierService;
+import com.detoranja.services.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,17 +23,21 @@ import java.util.UUID;
 public class SupplierController {
 
     final SupplierService supplierService;
+    final UserService userService;
 
-    public SupplierController(SupplierService supplierService) {
+    public SupplierController(SupplierService supplierService, UserService userService) {
         this.supplierService = supplierService;
+        this.userService = userService;
     }
 
     @PostMapping
-    public ResponseEntity<Object> saveSupplier(@RequestBody @Valid SupplierDto supplierDto) {
+    public ResponseEntity<Object> saveSupplier(@RequestBody @Valid SupplierDto supplierDto, @AuthenticationPrincipal User user) {
         if (supplierService.existByCnpj(supplierDto.getCnpj()))
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: Cnpj is already in use.");
         var supplierModel = new SupplierModel();
         BeanUtils.copyProperties(supplierDto, supplierModel);
+        supplierModel.setCreate_date(LocalDateTime.now(ZoneId.of("UTC")));
+        supplierModel.setUser_model(userService.findByUsername(user.getUsername()));
         return ResponseEntity.status(HttpStatus.OK).body(supplierService.save(supplierModel));
     }
 

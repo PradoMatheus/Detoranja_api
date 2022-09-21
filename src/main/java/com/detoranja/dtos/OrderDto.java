@@ -22,15 +22,5 @@ public class OrderDto implements Serializable {
     @NotBlank
     private StatusOrder status;
     @NotBlank
-    private List<OrderLogModel> orderLogModels;
-    @NotBlank
-    private LocalDateTime order_date;
-    @NotBlank
     private ClientModel clientModel;
-    @NotBlank
-    private ClientAddressModel clientAddressModel;
-    @NotBlank
-    private OrderShippingModel orderShippingModel;
-    @NotBlank
-    private UserModel user_model;
 }

@@ -1,11 +1,9 @@
 package com.detoranja.controllers;
 
-import com.detoranja.dtos.ClientContactDto;
 import com.detoranja.dtos.SupplierContactDto;
-import com.detoranja.models.ClientContactModel;
 import com.detoranja.models.SupplierContactModel;
-import com.detoranja.services.ClientContactService;
 import com.detoranja.services.SupplierContactService;
+import com.detoranja.services.SupplierService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +19,17 @@ import java.util.UUID;
 public class SupplierContactController {
 
     final SupplierContactService supplierContactService;
+    final SupplierService supplierService;
 
-    public SupplierContactController(SupplierContactService supplierContactService) {
+    public SupplierContactController(SupplierContactService supplierContactService, SupplierService supplierService) {
         this.supplierContactService = supplierContactService;
+        this.supplierService = supplierService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveSupplierContact(@RequestBody @Valid SupplierContactDto supplierContactDto) {
+        if (supplierService.findById(supplierContactDto.getSupplierModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Supplier not found");
         var supplierContactModel = new SupplierContactModel();
         BeanUtils.copyProperties(supplierContactDto, supplierContactModel);
         return ResponseEntity.status(HttpStatus.OK).body(supplierContactService.save(supplierContactModel));
@@ -60,6 +62,8 @@ public class SupplierContactController {
         var supplierContactModelOptional = supplierContactService.findById(id);
         if (!supplierContactModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Supplier Contact not found");
+        else if (supplierService.findById(supplierContactDto.getSupplierModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Supplier not found");
         var clientContactModel = supplierContactModelOptional.get();
         BeanUtils.copyProperties(supplierContactDto, clientContactModel);
         return ResponseEntity.status(HttpStatus.OK).body(supplierContactService.save(clientContactModel));

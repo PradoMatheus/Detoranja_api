@@ -1,5 +1,6 @@
 package com.detoranja.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,6 +26,7 @@ public class CartModel implements Serializable {
     private int quantity;
     @Column(nullable = false)
     private double total_value;
+    @JsonIgnoreProperties("cartModel")
     @OneToMany(mappedBy = "cartModel")
     private List<CartItemsModel> cartItemsModels;
 }

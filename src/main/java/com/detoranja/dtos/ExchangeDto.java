@@ -19,6 +19,4 @@ public class ExchangeDto implements Serializable {
     private CompanyModel companyModel;
     @NotBlank
     private StatusExchange status;
-    @NotBlank
-    private LocalDateTime date_create;
 }

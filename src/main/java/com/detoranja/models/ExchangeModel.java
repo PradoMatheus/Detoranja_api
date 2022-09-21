@@ -1,6 +1,7 @@
 package com.detoranja.models;
 
 import com.detoranja.enums.StatusExchange;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,12 +22,15 @@ public class ExchangeModel implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
     @ManyToOne
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", nullable = false)
     private OrderModel orderModel;
+    @JsonIgnoreProperties("exchangeModel")
     @OneToMany(mappedBy = "exchangeModel")
     private List<ExchangeItemsModel> exchangeItemsModels;
+    @JsonIgnoreProperties("exchangeModel")
     @OneToMany(mappedBy = "exchangeModel")
     private List<ExchangeLogModel> exchangeLogModels;
+    @JsonIgnoreProperties("exchangeModels")
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private CompanyModel companyModel;

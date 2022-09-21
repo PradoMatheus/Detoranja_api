@@ -1,6 +1,7 @@
 package com.detoranja.services;
 
 import com.detoranja.models.InventoryModel;
+import com.detoranja.models.ProductModel;
 import com.detoranja.repositories.InventoryRepository;
 import org.springframework.stereotype.Service;
 
@@ -31,5 +32,9 @@ public class InventoryService {
 
     public void delete(InventoryModel inventoryModel) {
         inventoryRepository.delete(inventoryModel);
+    }
+
+    public Boolean existsByProductModel(ProductModel productModel){
+        return inventoryRepository.existsByProductModel(productModel);
     }
 }

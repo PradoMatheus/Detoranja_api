@@ -1,10 +1,10 @@
 package com.detoranja.controllers;
 
-import com.detoranja.dtos.ExchangeDto;
 import com.detoranja.dtos.ExchangeItemsDto;
 import com.detoranja.models.ExchangeItemsModel;
-import com.detoranja.models.ExchangeModel;
 import com.detoranja.services.ExchangeItemsService;
+import com.detoranja.services.ExchangeService;
+import com.detoranja.services.ProductService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +20,21 @@ import java.util.UUID;
 public class ExchangeItemsController {
 
     final ExchangeItemsService exchangeItemsService;
+    final ExchangeService exchangeService;
+    final ProductService productService;
 
-    public ExchangeItemsController(ExchangeItemsService exchangeItemsService) {
+    public ExchangeItemsController(ExchangeItemsService exchangeItemsService, ExchangeService exchangeService, ProductService productService) {
         this.exchangeItemsService = exchangeItemsService;
+        this.exchangeService = exchangeService;
+        this.productService = productService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveExchangeItems(@RequestBody @Valid ExchangeItemsDto exchangeItemsDto) {
+        if (exchangeService.findById(exchangeItemsDto.getExchangeModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Exchange not found");
+        else if (productService.findById(exchangeItemsDto.getProductModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Product not found");
         var exchangeItemsModel = new ExchangeItemsModel();
         BeanUtils.copyProperties(exchangeItemsDto, exchangeItemsModel);
         return ResponseEntity.status(HttpStatus.OK).body(exchangeItemsService.save(exchangeItemsModel));
@@ -59,6 +67,10 @@ public class ExchangeItemsController {
         var exchangeItemsModelOptional = exchangeItemsService.findById(id);
         if (!exchangeItemsModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Exchange Items not found");
+        else if (exchangeService.findById(exchangeItemsDto.getExchangeModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Exchange not found");
+        else if (productService.findById(exchangeItemsDto.getProductModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Product not found");
         var exchangeItemsModel = exchangeItemsModelOptional.get();
         BeanUtils.copyProperties(exchangeItemsDto, exchangeItemsModel);
         return ResponseEntity.status(HttpStatus.OK).body(exchangeItemsService.save(exchangeItemsModel));

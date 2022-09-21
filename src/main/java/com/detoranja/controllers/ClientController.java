@@ -3,13 +3,13 @@ package com.detoranja.controllers;
 import com.detoranja.dtos.ClientDto;
 import com.detoranja.models.ClientModel;
 import com.detoranja.services.ClientService;
+import com.detoranja.services.CompanyService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -21,15 +21,19 @@ import java.util.UUID;
 public class ClientController {
 
     final ClientService clientService;
+    final CompanyService companyService;
 
-    public ClientController(ClientService clientService) {
+    public ClientController(ClientService clientService, CompanyService companyService) {
         this.clientService = clientService;
+        this.companyService = companyService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveClient(@RequestBody @Valid ClientDto clientDto) {
         if (clientService.existByCpf(clientDto.getCpf()))
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: Cpf is already in use.");
+        if (companyService.findById(clientDto.getCompanyModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Company not found.");
         var clientModel = new ClientModel();
         BeanUtils.copyProperties(clientDto, clientModel);
         clientModel.setCreate_date(LocalDateTime.now(ZoneId.of("UTC")));
@@ -63,6 +67,8 @@ public class ClientController {
         var clientModelOptional = clientService.findById(id);
         if (!clientModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
+        if (companyService.findById(clientDto.getCompanyModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Company not found.");
         var clientModel = clientModelOptional.get();
         BeanUtils.copyProperties(clientDto, clientModel);
         return ResponseEntity.status(HttpStatus.OK).body(clientService.save(clientModel));

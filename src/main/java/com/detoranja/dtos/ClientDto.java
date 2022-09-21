@@ -2,6 +2,7 @@ package com.detoranja.dtos;
 
 import com.detoranja.models.ClientAddressModel;
 import com.detoranja.models.ClientContactModel;
+import com.detoranja.models.CompanyModel;
 import com.detoranja.models.UserModel;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
@@ -23,8 +24,8 @@ public class ClientDto {
     @NotBlank
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birth_data;
-    private List<ClientAddressModel> clientAddressModels;
-    private List<ClientContactModel> clientContactModels;
+    @NotBlank
+    private CompanyModel companyModel;
     private UserModel userModel;
     private boolean enabled;
 }

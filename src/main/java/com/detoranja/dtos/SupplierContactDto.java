@@ -1,11 +1,9 @@
 package com.detoranja.dtos;
 
-import com.detoranja.models.ClientModel;
 import com.detoranja.models.SupplierModel;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
 
 @Getter

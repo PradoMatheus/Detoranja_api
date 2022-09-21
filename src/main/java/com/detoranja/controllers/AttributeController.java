@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping(value = "/product_attribute")
+@RequestMapping(value = "/attribute")
 public class AttributeController {
 
     final AttributeService attributeService;

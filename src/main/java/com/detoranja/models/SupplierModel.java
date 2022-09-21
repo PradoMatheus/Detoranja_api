@@ -1,5 +1,6 @@
 package com.detoranja.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,9 +20,9 @@ public class SupplierModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 500)
     private String social_reason;
-    @Column()
+    @Column(length = 500)
     private String fantasy_name;
     @Column(unique = true, length = 13)
     private String cnpj;
@@ -30,8 +31,10 @@ public class SupplierModel implements Serializable {
     private CompanyModel companyModel;
     @Column(unique = true)
     private long state_registration;
+    @JsonIgnoreProperties("supplierModel")
     @OneToMany(mappedBy = "supplierModel")
     private List<SupplierAddressModel> supplierAddressModels;
+    @JsonIgnoreProperties("supplierModel")
     @OneToMany(mappedBy = "supplierModel")
     private List<SupplierContactModel> supplierContactModels;
     @ManyToOne

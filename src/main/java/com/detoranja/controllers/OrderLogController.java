@@ -1,17 +1,20 @@
 package com.detoranja.controllers;
 
-import com.detoranja.dtos.OrderDto;
-import com.detoranja.dtos.OrderItemsDto;
 import com.detoranja.dtos.OrderLogDto;
-import com.detoranja.models.OrderItemsModel;
 import com.detoranja.models.OrderLogModel;
 import com.detoranja.services.OrderLogService;
+import com.detoranja.services.OrderService;
+import com.detoranja.services.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,15 +24,23 @@ import java.util.UUID;
 public class OrderLogController {
 
     final OrderLogService orderLogService;
+    final UserService userService;
+    final OrderService orderService;
 
-    public OrderLogController(OrderLogService orderLogService) {
+    public OrderLogController(OrderLogService orderLogService, UserService userService, OrderService orderService) {
         this.orderLogService = orderLogService;
+        this.userService = userService;
+        this.orderService = orderService;
     }
 
     @PostMapping
-    public ResponseEntity<Object> saveOrderLog(@RequestBody @Valid OrderLogDto orderLogDto) {
+    public ResponseEntity<Object> saveOrderLog(@RequestBody @Valid OrderLogDto orderLogDto, @AuthenticationPrincipal User user) {
+        if (orderService.findById(orderLogDto.getOrderModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found");
         var orderLogModel = new OrderLogModel();
         BeanUtils.copyProperties(orderLogDto, orderLogModel);
+        orderLogModel.setUserModel(userService.findByUsername(user.getUsername()));
+        orderLogModel.setDate(LocalDateTime.now(ZoneId.of("UTC")));
         return ResponseEntity.status(HttpStatus.OK).body(orderLogService.save(orderLogModel));
     }
 
@@ -60,6 +71,8 @@ public class OrderLogController {
         var orderLogModelOptional = orderLogService.findById(id);
         if (!orderLogModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order Log not found");
+        else if (orderService.findById(orderLogDto.getOrderModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found");
         var orderLogModel = orderLogModelOptional.get();
         BeanUtils.copyProperties(orderLogDto, orderLogModel);
         return ResponseEntity.status(HttpStatus.OK).body(orderLogService.save(orderLogModel));

@@ -1,10 +1,9 @@
 package com.detoranja.controllers;
 
 import com.detoranja.dtos.InventoryDto;
-import com.detoranja.dtos.ProductDto;
 import com.detoranja.models.InventoryModel;
-import com.detoranja.models.ProductModel;
 import com.detoranja.services.InventoryService;
+import com.detoranja.services.ProductService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -21,13 +19,19 @@ import java.util.UUID;
 public class InventoryController {
 
     final InventoryService inventoryService;
+    final ProductService productService;
 
-    public InventoryController(InventoryService inventoryService) {
+    public InventoryController(InventoryService inventoryService, ProductService productService) {
         this.inventoryService = inventoryService;
+        this.productService = productService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveInventory(@RequestBody @Valid InventoryDto inventoryDto) {
+        if (inventoryService.existsByProductModel(inventoryDto.getProductModel()))
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: Product Inventory just exist.");
+        if (productService.findById(inventoryDto.getProductModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Product not found.");
         var inventoryModel = new InventoryModel();
         BeanUtils.copyProperties(inventoryDto, inventoryModel);
         return ResponseEntity.status(HttpStatus.CREATED).body(inventoryService.save(inventoryModel));
@@ -61,6 +65,8 @@ public class InventoryController {
         var inventoryModelOptional = inventoryService.findById(id);
         if (!inventoryModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Inventory not found.");
+        if (productService.findById(inventoryDto.getProductModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Product not found.");
         var inventoryModel = inventoryModelOptional.get();
         BeanUtils.copyProperties(inventoryDto, inventoryModel);
         return ResponseEntity.status(HttpStatus.OK).body(inventoryService.save(inventoryModel));

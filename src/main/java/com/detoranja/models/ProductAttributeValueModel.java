@@ -1,5 +1,6 @@
 package com.detoranja.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,6 +18,7 @@ public class ProductAttributeValueModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+    @JsonIgnoreProperties("productAttributeValueModels")
     @ManyToOne
     @JoinColumn(name = "product_attribute_model_id", nullable = false)
     private ProductAttributeModel productAttributeModel;

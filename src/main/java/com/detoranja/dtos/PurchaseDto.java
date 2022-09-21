@@ -19,11 +19,7 @@ public class PurchaseDto implements Serializable {
     @NotBlank
     private String fiscal_note;
     @NotBlank
-    private LocalDateTime create_date;
-    @NotBlank
     private double price;
-    @NotBlank
-    private UserModel user_model;
     @NotBlank
     private SupplierModel supplierModel;
 }

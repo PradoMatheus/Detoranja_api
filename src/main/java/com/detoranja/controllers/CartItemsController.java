@@ -1,10 +1,7 @@
 package com.detoranja.controllers;
 
-import com.detoranja.dtos.CartDto;
 import com.detoranja.dtos.CartItemsDto;
-import com.detoranja.dtos.SupplierContactDto;
 import com.detoranja.models.CartItemsModel;
-import com.detoranja.models.CartModel;
 import com.detoranja.services.CartItemsService;
 import com.detoranja.services.CartService;
 import org.springframework.beans.BeanUtils;
@@ -18,17 +15,21 @@ import java.util.UUID;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping(value = "/cart/Items")
+@RequestMapping(value = "/cart/items")
 public class CartItemsController {
 
     final CartItemsService cartItemsService;
+    final CartService cartService;
 
-    public CartItemsController(CartItemsService cartItemsService) {
+    public CartItemsController(CartItemsService cartItemsService, CartService cartService) {
         this.cartItemsService = cartItemsService;
+        this.cartService = cartService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveCartItems(@RequestBody @Valid CartItemsDto cartItemsDto) {
+        if (cartService.findById(cartItemsDto.getCartModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart not found");
         var cartItemsModel = new CartItemsModel();
         BeanUtils.copyProperties(cartItemsDto, cartItemsModel);
         return ResponseEntity.status(HttpStatus.OK).body(cartItemsService.save(cartItemsModel));
@@ -61,8 +62,10 @@ public class CartItemsController {
         var cartItemsModelOptional = cartItemsService.findById(id);
         if (!cartItemsModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart Items not found");
+        if (cartService.findById(cartItemsDto.getCartModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart not found");
         var cartItemsModel = cartItemsModelOptional.get();
-        BeanUtils.copyProperties(cartItemsModel, cartItemsModel);
+        BeanUtils.copyProperties(cartItemsDto, cartItemsModel);
         return ResponseEntity.status(HttpStatus.OK).body(cartItemsService.save(cartItemsModel));
     }
 }

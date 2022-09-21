@@ -3,6 +3,7 @@ package com.detoranja.controllers;
 import com.detoranja.dtos.ClientAddressDto;
 import com.detoranja.models.ClientAddressModel;
 import com.detoranja.services.ClientAddressService;
+import com.detoranja.services.ClientService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +19,18 @@ import java.util.UUID;
 public class ClientAddressController {
 
     final ClientAddressService clientAddressService;
+    final ClientService clientService;
 
-    public ClientAddressController(ClientAddressService clientAddressService) {
+    public ClientAddressController(ClientAddressService clientAddressService, ClientService clientService) {
         this.clientAddressService = clientAddressService;
+        this.clientService = clientService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveClientAddress(@RequestBody @Valid ClientAddressDto clientAddressDto) {
         var clientAddressModel = new ClientAddressModel();
+        if (clientService.findById(clientAddressDto.getClientModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
         BeanUtils.copyProperties(clientAddressDto, clientAddressModel);
         return ResponseEntity.status(HttpStatus.OK).body(clientAddressService.save(clientAddressModel));
     }
@@ -57,6 +62,8 @@ public class ClientAddressController {
         var clientAddressModelOptional = clientAddressService.findById(id);
         if (!clientAddressModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client Address not found");
+        if (clientService.findById(clientAddressDto.getClientModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
         var clientAddressModel = clientAddressModelOptional.get();
         BeanUtils.copyProperties(clientAddressDto, clientAddressModel);
         return ResponseEntity.status(HttpStatus.OK).body(clientAddressService.save(clientAddressModel));

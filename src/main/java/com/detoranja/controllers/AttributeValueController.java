@@ -2,6 +2,7 @@ package com.detoranja.controllers;
 
 import com.detoranja.dtos.AttributeValueDto;
 import com.detoranja.models.AttributeValueModel;
+import com.detoranja.services.AttributeService;
 import com.detoranja.services.AttributeValueService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
@@ -14,19 +15,23 @@ import java.util.UUID;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping(value = "/product_attribute_value")
+@RequestMapping(value = "/attribute/value")
 public class AttributeValueController {
 
     final AttributeValueService productAttributeValueService;
+    final AttributeService attributeService;
 
-    public AttributeValueController(AttributeValueService productAttributeValueService) {
+    public AttributeValueController(AttributeValueService productAttributeValueService, AttributeService attributeService) {
         this.productAttributeValueService = productAttributeValueService;
+        this.attributeService = attributeService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveProductAttributeValue(@RequestBody @Valid AttributeValueDto attributeValueDto) {
         if (productAttributeValueService.existByName(attributeValueDto.getName()))
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: Name is already in use.");
+        if (attributeService.findById(attributeValueDto.getAttributeModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Attribute not found");
         var productAttributeValueModel = new AttributeValueModel();
         BeanUtils.copyProperties(attributeValueDto, productAttributeValueModel);
         return ResponseEntity.status(HttpStatus.OK).body(productAttributeValueService.save(productAttributeValueModel));
@@ -60,6 +65,8 @@ public class AttributeValueController {
         var attributeValueModelOptional = productAttributeValueService.findById(id);
         if (!attributeValueModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product Attribute Value not found.");
+        if (attributeService.findById(attributeValueDto.getAttributeModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Attribute not found");
         var productAttributeValueModel = attributeValueModelOptional.get();
         productAttributeValueModel.setName(attributeValueDto.getName());
         productAttributeValueModel.setAttributeModel(attributeValueDto.getAttributeModel());

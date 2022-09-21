@@ -1,5 +1,6 @@
 package com.detoranja.dtos;
 
+import com.detoranja.models.OrderModel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,8 @@ import java.util.UUID;
 @Getter
 @Setter
 public class OrderShippingDto implements Serializable {
+    @NotBlank
+    private OrderModel orderModel;
     @NotBlank
     private double value;
     @NotBlank

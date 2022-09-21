@@ -18,11 +18,5 @@ public class ExchangeLogDto implements Serializable {
     @NotBlank
     private ExchangeModel exchangeModel;
     @NotBlank
-    private StatusExchange olderStatus;
-    @NotBlank
-    private StatusExchange newStatus;
-    @NotBlank
-    private UserModel userModel;
-    @NotBlank
-    private LocalDateTime date;
+    private StatusExchange status;
 }

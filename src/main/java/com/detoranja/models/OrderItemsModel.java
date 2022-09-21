@@ -1,5 +1,6 @@
 package com.detoranja.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,7 +17,8 @@ public class OrderItemsModel implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID uuid;
+    private UUID id;
+    @JsonIgnoreProperties("orderItemsModels")
     @ManyToOne
     @JoinColumn(name = "order_id")
     private OrderModel orderModel;

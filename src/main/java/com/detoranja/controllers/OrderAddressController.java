@@ -1,11 +1,9 @@
 package com.detoranja.controllers;
 
 import com.detoranja.dtos.OrderAddressDto;
-import com.detoranja.dtos.OrderDto;
-import com.detoranja.dtos.OrderItemsDto;
 import com.detoranja.models.OrderAddressModel;
-import com.detoranja.models.OrderItemsModel;
 import com.detoranja.services.OrderAddressService;
+import com.detoranja.services.OrderService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +19,17 @@ import java.util.UUID;
 public class OrderAddressController {
 
     final OrderAddressService orderAddressService;
+    final OrderService orderService;
 
-    public OrderAddressController(OrderAddressService orderAddressService) {
+    public OrderAddressController(OrderAddressService orderAddressService, OrderService orderService) {
         this.orderAddressService = orderAddressService;
+        this.orderService = orderService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveOrderAddress(@RequestBody @Valid OrderAddressDto orderAddressDto) {
+        if (orderService.findById(orderAddressDto.getOrderModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Order not found");
         var orderAddressModel = new OrderAddressModel();
         BeanUtils.copyProperties(orderAddressDto, orderAddressModel);
         return ResponseEntity.status(HttpStatus.OK).body(orderAddressService.save(orderAddressModel));
@@ -60,6 +62,8 @@ public class OrderAddressController {
         var orderAddressModelOptional = orderAddressService.findById(id);
         if (!orderAddressModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order Address not found");
+        else if (orderService.findById(orderAddressDto.getOrderModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Order not found");
         var orderAddressModel = orderAddressModelOptional.get();
         BeanUtils.copyProperties(orderAddressDto, orderAddressModel);
         return ResponseEntity.status(HttpStatus.OK).body(orderAddressService.save(orderAddressModel));

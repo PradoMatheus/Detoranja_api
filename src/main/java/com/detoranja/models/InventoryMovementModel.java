@@ -1,6 +1,7 @@
 package com.detoranja.models;
 
 import com.detoranja.enums.TypeMovement;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +20,10 @@ public class InventoryMovementModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+    @JsonIgnoreProperties("inventoryMovementModels")
+    @ManyToOne
+    @JoinColumn(name = "inventory_id", nullable = false)
+    private InventoryModel inventoryModel;
     @Column(nullable = false)
     private int quantity;
     @Column(nullable = false)

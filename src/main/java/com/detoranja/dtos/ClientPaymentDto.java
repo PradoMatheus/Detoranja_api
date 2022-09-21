@@ -2,6 +2,7 @@ package com.detoranja.dtos;
 
 import com.detoranja.enums.TypePayment;
 import com.detoranja.models.ClientModel;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,6 +23,7 @@ public class ClientPaymentDto {
     @NotBlank
     private String alias;
     @NotBlank
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date_validate;
     private String cvv;
     private long number_card;

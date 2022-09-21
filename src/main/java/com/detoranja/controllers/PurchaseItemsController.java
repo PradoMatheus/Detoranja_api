@@ -1,10 +1,10 @@
 package com.detoranja.controllers;
 
-import com.detoranja.dtos.ExchangeDto;
 import com.detoranja.dtos.PurchaseItemsDto;
-import com.detoranja.models.ExchangeModel;
 import com.detoranja.models.PurchaseItemsModel;
+import com.detoranja.services.ProductService;
 import com.detoranja.services.PurchaseItemsService;
+import com.detoranja.services.PurchaseService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +20,21 @@ import java.util.UUID;
 public class PurchaseItemsController {
 
     final PurchaseItemsService purchaseItemsService;
+    final PurchaseService purchaseService;
+    final ProductService productService;
 
-    public PurchaseItemsController(PurchaseItemsService purchaseItemsService) {
+    public PurchaseItemsController(PurchaseItemsService purchaseItemsService, PurchaseService purchaseService, ProductService productService) {
         this.purchaseItemsService = purchaseItemsService;
+        this.purchaseService = purchaseService;
+        this.productService = productService;
     }
 
     @PostMapping
     public ResponseEntity<Object> savePurchaseItems(@RequestBody @Valid PurchaseItemsDto purchaseItemsDto) {
+        if (purchaseService.findById(purchaseItemsDto.getPurchaseModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Purchase not found");
+        else if (productService.findById(purchaseItemsDto.getProductModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Product not found");
         var purchaseItemsModel = new PurchaseItemsModel();
         BeanUtils.copyProperties(purchaseItemsDto, purchaseItemsModel);
         return ResponseEntity.status(HttpStatus.OK).body(purchaseItemsService.save(purchaseItemsModel));
@@ -59,6 +67,10 @@ public class PurchaseItemsController {
         var purchaseItemsModelOptional = purchaseItemsService.findById(id);
         if (!purchaseItemsModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Purchase Items not found");
+        else if (purchaseService.findById(purchaseItemsDto.getPurchaseModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Purchase not found");
+        else if (productService.findById(purchaseItemsDto.getProductModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Product not found");
         var purchaseItemsModel = purchaseItemsModelOptional.get();
         BeanUtils.copyProperties(purchaseItemsDto, purchaseItemsModel);
         return ResponseEntity.status(HttpStatus.OK).body(purchaseItemsService.save(purchaseItemsModel));

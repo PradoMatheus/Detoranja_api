@@ -18,11 +18,5 @@ public class OrderLogDto implements Serializable {
     @NotBlank
     private OrderModel orderModel;
     @NotBlank
-    private StatusOrder olderStatus;
-    @NotBlank
-    private StatusOrder newStatus;
-    @NotBlank
-    private UserModel userModel;
-    @NotBlank
-    private LocalDateTime date;
+    private StatusOrder status;
 }

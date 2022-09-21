@@ -2,6 +2,8 @@ package com.detoranja.controllers;
 
 import com.detoranja.dtos.ProductDto;
 import com.detoranja.models.ProductModel;
+import com.detoranja.services.CompanyService;
+import com.detoranja.services.ProductCategoryService;
 import com.detoranja.services.ProductService;
 import com.detoranja.services.UserService;
 import org.springframework.beans.BeanUtils;
@@ -25,14 +27,22 @@ public class ProductController {
 
     final ProductService productService;
     final UserService userService;
+    final ProductCategoryService productCategoryService;
+    final CompanyService companyService;
 
-    public ProductController(ProductService productService, UserService userService) {
+    public ProductController(ProductService productService, UserService userService, ProductCategoryService productCategoryService, CompanyService companyService) {
         this.productService = productService;
         this.userService = userService;
+        this.productCategoryService = productCategoryService;
+        this.companyService = companyService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveProduct(@RequestBody @Valid ProductDto productDto, @AuthenticationPrincipal User user) {
+        if (productCategoryService.findById(productDto.getProductCategory().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product Category not found");
+        if (companyService.findById(productDto.getCompanyModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Company not found.");
         var productModel = new ProductModel();
         BeanUtils.copyProperties(productDto, productModel);
         productModel.setCreate_date(LocalDateTime.now(ZoneId.of("UTC")));
@@ -68,6 +78,10 @@ public class ProductController {
         Optional<ProductModel> productModelOptional = productService.findById(id);
         if (!productModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+        if (productCategoryService.findById(productDto.getProductCategory().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product Category not found");
+        if (companyService.findById(productDto.getCompanyModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found: Company not found.");
         var productModel = productModelOptional.get();
         productModel.setName(productDto.getName());
         productModel.setDescription(productDto.getDescription());

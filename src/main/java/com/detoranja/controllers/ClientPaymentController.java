@@ -3,6 +3,7 @@ package com.detoranja.controllers;
 import com.detoranja.dtos.ClientPaymentDto;
 import com.detoranja.models.ClientPaymentModel;
 import com.detoranja.services.ClientPaymentService;
+import com.detoranja.services.ClientService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +19,18 @@ import java.util.UUID;
 public class ClientPaymentController {
 
     final ClientPaymentService clientPaymentService;
+    final ClientService clientService;
 
-    public ClientPaymentController(ClientPaymentService clientPaymentService) {
+    public ClientPaymentController(ClientPaymentService clientPaymentService, ClientService clientService) {
         this.clientPaymentService = clientPaymentService;
+        this.clientService = clientService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveClientPayment(@RequestBody @Valid ClientPaymentDto clientPaymentDto) {
         var clientPaymentModel = new ClientPaymentModel();
+        if (clientService.findById(clientPaymentDto.getClientModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
         BeanUtils.copyProperties(clientPaymentDto, clientPaymentModel);
         return ResponseEntity.status(HttpStatus.OK).body(clientPaymentService.save(clientPaymentModel));
     }
@@ -57,6 +62,8 @@ public class ClientPaymentController {
         var clientPaymentModelOptional = clientPaymentService.findById(id);
         if (!clientPaymentModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client Payment not found");
+        if (clientService.findById(clientPaymentDto.getClientModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
         var clientPaymentModel = clientPaymentModelOptional.get();
         BeanUtils.copyProperties(clientPaymentDto, clientPaymentModel);
         return ResponseEntity.status(HttpStatus.OK).body(clientPaymentService.save(clientPaymentModel));

@@ -2,6 +2,7 @@ package com.detoranja.models;
 
 import com.detoranja.enums.StatusExchange;
 import com.detoranja.enums.StatusOrder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,13 +21,12 @@ public class ExchangeLogModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+    @JsonIgnoreProperties("exchangeLogModels")
     @ManyToOne
-    @JoinColumn(name = "exchange_id")
+    @JoinColumn(name = "exchange_id", nullable = false)
     private ExchangeModel exchangeModel;
     @Column(nullable = false)
-    private StatusExchange olderStatus;
-    @Column(nullable = false)
-    private StatusExchange newStatus;
+    private StatusExchange status;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserModel userModel;

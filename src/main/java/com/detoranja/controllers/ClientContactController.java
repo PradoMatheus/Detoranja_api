@@ -1,10 +1,9 @@
 package com.detoranja.controllers;
 
-import com.detoranja.dtos.ClientAddressDto;
 import com.detoranja.dtos.ClientContactDto;
-import com.detoranja.models.ClientAddressModel;
 import com.detoranja.models.ClientContactModel;
 import com.detoranja.services.ClientContactService;
+import com.detoranja.services.ClientService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +19,18 @@ import java.util.UUID;
 public class ClientContactController {
 
     final ClientContactService clientContactService;
+    final ClientService clientService;
 
-    public ClientContactController(ClientContactService clientContactService) {
+    public ClientContactController(ClientContactService clientContactService, ClientService clientService) {
         this.clientContactService = clientContactService;
+        this.clientService = clientService;
     }
 
     @PostMapping
     public ResponseEntity<Object> saveClientContact(@RequestBody @Valid ClientContactDto clientContactDto) {
         var clientContactModel = new ClientContactModel();
+        if (clientService.findById(clientContactDto.getClientModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
         BeanUtils.copyProperties(clientContactDto, clientContactModel);
         return ResponseEntity.status(HttpStatus.OK).body(clientContactService.save(clientContactModel));
     }
@@ -59,6 +62,8 @@ public class ClientContactController {
         var clientContactModelOptional = clientContactService.findById(id);
         if (!clientContactModelOptional.isPresent())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client Contact not found");
+        if (clientService.findById(clientContactDto.getClientModel().getId()).isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
         var clientContactModel = clientContactModelOptional.get();
         BeanUtils.copyProperties(clientContactDto, clientContactModel);
         return ResponseEntity.status(HttpStatus.OK).body(clientContactService.save(clientContactModel));

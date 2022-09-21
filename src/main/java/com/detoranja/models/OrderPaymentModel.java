@@ -1,6 +1,7 @@
 package com.detoranja.models;
 
 import com.detoranja.enums.TypePayment;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +20,7 @@ public class OrderPaymentModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+    @JsonIgnoreProperties("orderPaymentModels")
     @ManyToOne
     @JoinColumn(name = "order_id")
     private OrderModel orderModel;

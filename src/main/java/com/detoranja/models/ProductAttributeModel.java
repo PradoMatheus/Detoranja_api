@@ -1,5 +1,6 @@
 package com.detoranja.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@Table(name = "tb_product_attribute_rel")
+@Table(name = "tb_product_attribute")
 public class ProductAttributeModel implements Serializable {
     private static final long serialVersionUID = 1;
 
@@ -21,9 +22,9 @@ public class ProductAttributeModel implements Serializable {
     @ManyToOne
     @JoinColumn(name = "attribute_model_id", nullable = false)
     private AttributeModel attributeModel;
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private ProductModel productModel;
+    @ManyToMany(mappedBy = "productAttributeModels")
+    private List<ProductModel> productModel;
+    @JsonIgnoreProperties("productAttributeModel")
     @OneToMany(mappedBy = "productAttributeModel")
     private List<ProductAttributeValueModel> productAttributeValueModels;
 }

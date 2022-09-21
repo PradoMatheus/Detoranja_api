@@ -2,6 +2,7 @@ package com.detoranja.dtos;
 
 import com.detoranja.enums.TypeCoupon;
 import com.detoranja.models.CompanyModel;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,6 +22,7 @@ public class CouponDto {
     private double percentage;
     @NotBlank
     private double value;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date_validate;
     @NotBlank
     private boolean enable;

@@ -1,6 +1,8 @@
 package com.detoranja.models;
 
 import com.detoranja.enums.TypePayment;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +21,7 @@ public class ClientPaymentModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+    @JsonIgnoreProperties("clientPaymentModels")
     @ManyToOne
     @JoinColumn(name = "client_id")
     private ClientModel clientModel;

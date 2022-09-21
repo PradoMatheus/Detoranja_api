@@ -24,6 +24,9 @@ public class PurchaseItemsModel implements Serializable {
     @Column()
     private String observation;
     @ManyToOne
-    @JoinColumn(name = "product_id")
-    private ProductModel product_model;
+    @JoinColumn(name = "purchase_id", nullable = false)
+    private PurchaseModel purchaseModel;
+    @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private ProductModel productModel;
 }
